@@ -7,12 +7,17 @@ let steps = 6
 let count = 0;
 let bgColor;
 
+
 // weather api call
-let weather;
-let api=`api.openweathermap.org/data/2.5/forecast/daily?q={city name},{country code}&cnt={cnt}`;
-let apiKey=OPEN_WEATHER_KEY;
+// how do i import from .env file?
+let apiKey= 'f2038a35dbc40be211675c09ae73bd2a';
+let cityName = 'cityname';
+let countryCode = 'us';
 let units='&cnt=16&units=metric';
-let input = 'New York';
+let cnt = 2;
+let weather;
+let api=`api.openweathermap.org/data/2.5/forecast/daily?q=${cityName},${countryCode}&cnt=${cnt}`;
+// let input = 'New York';
 
 
 // wind
@@ -44,10 +49,11 @@ let angleSlider, coefSlider, lSlider, branchesSlider, stepsSlider;
 //   //   })
 // }
 
+
 function setup() {
-  // createCanvas(1000, 1000);
   createCanvas(window.innerWidth, window.innerHeight);
   textSize(20);
+
 
   // make api call
   // input = createInput();
@@ -65,6 +71,7 @@ function setup() {
   // input = 'new york';
 
 
+  // sliders
   angleSlider = createSlider(0, 3.1415926536, 0.7853981636, 0.05);
   angleSlider.position(20, height-165); // 175
 
@@ -90,9 +97,10 @@ function weatherAsk() {
   let url = api + input + apiKey + units;
   console.log(url);
   loadJSON(url, gotData);
-  console.log(url);
+
 }
 
+//
 function gotData(data) {
   weather = data;
   console.log(data);
