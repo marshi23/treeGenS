@@ -1,123 +1,42 @@
 let socket;
+let s = 0; // scale
+
+// tree features
 let angle = 0.7853981634;
 let coef = 0.5;
 let l = 200;
 let branches;
 let steps = 6
 let count = 0;
+let flowerChance;
 let bgColor;
 
-
 // weather api call
-// how do i import from .env file?
-let apiKey= 'f2038a35dbc40be211675c09ae73bd2a';
-let cityName = 'cityname';
-let countryCode = 'us';
+let apiKey; // how do i import from .env file?
+let cityName;
+let countryCode;
 let units='&cnt=16&units=metric';
 let cnt = 2;
 let weather;
-let api=`api.openweathermap.org/data/2.5/forecast/daily?q=${cityName},${countryCode}&cnt=${cnt}`;
-// let input = 'New York';
-
+let url = `http://api.openweathermap.org/data/2.5/weather?q=Seattle,us&APPID=f2038a35dbc40be211675c09ae73bd2a`
 
 // wind
 let rotRange = 10;
 let time = 0;
-
-// scale
-s = 0;
+let currentWindSpeed;
 
 // sliders
 let angleSlider, coefSlider, lSlider, branchesSlider, stepsSlider;
-
-// function preload() {
-//   // url = "https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22";
-//
-//   // axios({
-//   //   method:'get',
-//   //   url:'https://samples.openweathermap.org/data/2.5/weather?q=London,uk&appid=b6907d289e10d714a6e88b30761fae22',
-//   //   headers: {'Access-Control-Allow-Origin': '*'},
-//   // })
-//   // .then((response) => {
-//   //     console.log(response);
-//   //     let wind = response.data.wind;
-//   //     console.log(response);
-//   //     // gotData(wind);
-//   //   })
-//   //   .catch((error) => {
-//   //     console.log(error);
-//   //   })
-// }
-
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   textSize(20);
 
-
-  // make api call
-  // input = createInput();
-  // input.position(20, 65);
-  //
-  // button = createButton('submit');
-  // button.position(width/2, 65);
-  // button.mousePressed(weatherAsk);
-  //
-  //
-  // button.mousePressed(weatherAsk);
-  // // input = select('#city');
-  // console.log(input);
-  //
-  // input = 'new york';
-
-
-  // sliders
-  angleSlider = createSlider(0, 3.1415926536, 0.7853981636, 0.05);
-  angleSlider.position(20, height-165); // 175
-
-  coefSlider = createSlider(0, 0.75, 0.5, 0.05);
-  coefSlider.position(20, height-120); // 140
-
-  lSlider = createSlider(50, 450, 300, 50);
-  lSlider.position(20, height-85); // 105
-
-  branchesSlider = createSlider(1, 3, 1, 1);
-  branchesSlider.position(20, height-50); // 70
-
-  stepsSlider = createSlider(1, 10, 6, 1);
-  stepsSlider.position(20, height-15); // 35
+  createSliders(); // sliders
 
   randomize();
   reset();
 }
-
-// geting weather data
-function weatherAsk() {
-  console.log('in ask');
-  let url = api + input + apiKey + units;
-  console.log(url);
-  loadJSON(url, gotData);
-
-}
-
-//
-function gotData(data) {
-  weather = data;
-  console.log(data);
-  for(var i=0;i<weather.list.length;i++){
-  var mintemp=weather.list[i].temp.min;
-  var maxtemp=weather.list[i].temp.max;
-  var eventemp=weather.list[i].temp.eve;
-  minY[i]=map(mintemp,-5,40,height*0.8,0);
-  maxY[i]=map(maxtemp,-5,40,height*0.8,0);
-  evenY[i]=map(eventemp,-5,40,height*0.8,0);
-  }
-
-  for (var j = 0; j < 100; j++) {
-    drop[j] = new Drop();
-  }
-}
-
 
 function draw() {
   background(bgColor);
@@ -132,7 +51,7 @@ function draw() {
   // slider display
   noStroke();
   fill(255);
-  text("Wind Speed: ",20,height-210);
+  text(`Current Wind Speed: ${round(currentWindSpeed)}mph`,20,height-210);
   text("How open are the branches?",165,height-165); // angle
   text("How long should the branches be?",165,height-120); // coef
   text("How tall is the tree feeling?",165,height-85); // l
@@ -144,7 +63,7 @@ function draw() {
   {
     time = 0;
     randomize();
-    // flowerChance = 0.1;
+    flowerChance = 0.1;
     reset();
   }
 
@@ -177,3 +96,31 @@ function mousePressed() {
 function reset() {
   background(bgColor);
 };
+
+// geting weather data
+function weatherAsk() {
+  loadJSON(url, gotData);
+}
+
+function gotData(data) {
+  weather = data;
+  currentWindSpeed = weather.wind.speed;
+}
+
+// create sliders
+function createSliders() {
+  angleSlider = createSlider(0, 3.1415926536, 0.7853981636, 0.05);
+  angleSlider.position(20, height-165);
+
+  coefSlider = createSlider(0, 0.75, 0.5, 0.05);
+  coefSlider.position(20, height-120);
+
+  lSlider = createSlider(50, 450, 300, 50);
+  lSlider.position(20, height-85);
+
+  branchesSlider = createSlider(1, 3, 1, 1);
+  branchesSlider.position(20, height-50);
+
+  stepsSlider = createSlider(1, 10, 6, 1);
+  stepsSlider.position(20, height-15);
+}

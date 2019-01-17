@@ -2,12 +2,17 @@ let express = require('express');
 let app = express();
 
 
-let server = app.listen(3000);
+let server = app.listen(4000);
 app.use(express.static('public'));
 
 let socket = require('socket.io');
 let io = socket(server);
 console.log('my server is running');
+
+app.get('/', function (req, res) {
+      res.send('Hello Dev!');
+  });
+
 
 io.sockets.on('connection', newConnection);
 
