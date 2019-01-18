@@ -9,11 +9,6 @@ let socket = require('socket.io');
 let io = socket(server);
 console.log('my server is running');
 
-app.get('/', function (req, res) {
-      res.send('Hello Dev!');
-  });
-
-
 io.sockets.on('connection', newConnection);
 
 function newConnection(socket) {
