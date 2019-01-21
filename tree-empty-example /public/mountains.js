@@ -1,7 +1,7 @@
 function Mountains(top, bottom, time) { //#D36F6F, #AD1515
-    var ranges = [];
-    var start, end;
-    console.log(time);
+    let ranges = [];
+    let start, end;
+
     if (time < 0.5) {
         let from = color(211,111,111);
         let to = color(242,193,120);
@@ -47,7 +47,6 @@ function MountainRange(y, spread, c, foreground, time) {
     var noiseElevation = random(1, 100);
     var spikiness = random(40, 90);
 
-    console.log(elevation);
     for (var x = 0; x < 150; x++) {
         elevation.push(map(noise(x / spikiness, noiseElevation), 0, 1, -1, 1) * spread);
     }

@@ -1,17 +1,11 @@
-//// adding tree test
-///////////variable declarations////////////////////////
-
-let socket; // socket lib allows one user to draw and another see the drawing
-// tree features
-let s = 0; // scale
-let angle = 0.7853981634;
-let coef = 0.5;
-let len = 200;
-let branches;
-let steps = 6
-let count = 0;
-let flowerChance;
-let bgColor;
+////variable declarations////
+////  tree variables;
+let slider_size, slider_level, slider_rot, slider_lenRand, slider_branchProb, slider_rotRand, slider_leafProb;
+let button_seed, button_newSeed, button_randomParams, button_change;
+let label_size, label_level, label_rot, label_lenRand, label_branchProb, label_rotRand, label_leafProb, label_perf, label_seed, label_source, label_source2;
+let div_inputs;
+let input_seed, size, maxLevel, rot, lenRan, branchProb, rotRand, leafProb;
+let hide = false, prog = 1, growing = false, mutating = false, randSeed = 80, paramSeed = Math.floor(Math.random()*1000), randBias = 0;
 
 // weather api call
 let apiKey; // how do i import from .env file?
@@ -43,17 +37,13 @@ let flock;
 let mountains;
 let time;
 
-// text
-let graphics;
-
 function preload() {
-  weatherAsk(); // calls api and gets weather
+  weatherAsk();
 }
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   textSize(20);
-
 
   // create raindrops
   for (i = 0; i < nDrops; i++) {
@@ -67,7 +57,7 @@ function setup() {
   // create flock and add boids to them
   flock = new Flock();
 
-  // Add an initial set of boids into the system
+  // create boids
   if (currentWindSpeed) {
     for (var i = 0; i < 100; i++) {
       var b = new Boid(width/2,height/2);
@@ -75,15 +65,136 @@ function setup() {
     }
   }
 
+// mountains
   time = random(1);
   mountains = new Mountains(height - 100, height - 10, time);
 
-}
+  ///tree
 
+  slider_size = createSlider(100, 200, /mobile/i.test(window.navigator.userAgent) ? 100 : 150, 1);
+	slider_size.position(width-180, 25);
+	slider_level = createSlider(1, 13, 11, 1);
+	slider_level.position(width-180, 35);
+	slider_rot = createSlider(0, PI/2, (PI/2) / 4, (PI/2) / (3 * 5 * 8));
+	slider_rot.position(width-180, 55);
+	slider_lenRand = createSlider(0, 1, 1, 0.01);
+	slider_lenRand.position(width-180, 60);
+	slider_branchProb = createSlider(0, 1, 0.9, 0.01);
+	slider_branchProb.position(width-180, 70);
+	slider_rotRand = createSlider(0, 1, 0.1, 0.01);
+	slider_rotRand.position(width-180, 110);
+	slider_leafProb = createSlider(0, 1, 0.5, 0.01);
+	slider_leafProb.position(width-180, 130);
+
+	slider_size.input(function(){readInputs(true)});
+	slider_level.input(function(){readInputs(true)});
+	slider_rot.input(function(){readInputs(true)});
+	slider_lenRand.input(function(){readInputs(true)});
+	slider_branchProb.input(function(){readInputs(true)});
+	slider_rotRand.input(function(){readInputs(true)});
+	slider_leafProb.input(function(){readInputs(true)});
+
+
+	label_size = createSpan('Size');
+	label_size.position(width-190, 10);
+	label_level = createSpan('Recursion level');
+	label_level.position(width-190, 30);
+	label_rot = createSpan('Split angle');
+	label_rot.position(width-190, 40);
+	label_lenRand = createSpan('Length variation');
+	label_lenRand.position(width-190, 55);
+	label_branchProb = createSpan('Split probability');
+	label_branchProb.position(width-190, 65);
+	label_rotRand = createSpan('Split rotation variation');
+	label_rotRand.position(width-190, 250);
+	label_leafProb = createSpan('Flower probability');
+	label_leafProb.position(width-190, 300);
+
+	label_seed = createSpan('Seed:');
+	label_seed.position(width-190, 162);
+
+	input_seed = createInput(randSeed);
+	input_seed.position(width-190, 160);
+	input_seed.style('width', '50px')
+
+	button_seed = createButton('Watch it grow!');
+	button_seed.position(width-190, 190);
+	button_seed.mousePressed(function() {
+		randSeed = input_seed.value();
+		startGrow();
+	});
+
+	button_newSeed = createButton('Generate new tree');
+	button_newSeed.position(width-190, 190);
+	button_newSeed.mousePressed(function(){
+		randSeed = Math.floor(Math.random() * 1000);
+		prog = 100;
+		input_seed.value(randSeed);
+		startGrow();
+	});
+
+	button_randomParams = createButton('Randomise parameters');
+	button_randomParams.position(width-190, 220);
+	button_randomParams.mousePressed(function(){
+		randomSeed(paramSeed);
+
+		slider_level.value(1 * slider_level.value() + 4 * rand2() * slider_level.attribute('step'));
+		slider_rot.value(1 * slider_rot.value() + 4 * rand2() * slider_rot.attribute('step'));
+		slider_lenRand.value(1 * slider_lenRand.value() + 4 * rand2() * slider_lenRand.attribute('step'));
+		slider_branchProb.value(1 * slider_branchProb.value() + 4 * rand2() * slider_branchProb.attribute('step'));
+		slider_rotRand.value(1 * slider_rotRand.value() + 4 * rand2() * slider_rotRand.attribute('step'));
+		slider_leafProb.value(1 * slider_leafProb.value() + 4 * rand2() * slider_leafProb.attribute('step'));
+
+		paramSeed = 1000 * random();
+		randomSeed(randSeed);
+
+		readInputs(true);
+	});
+
+	button_change = createButton('Enable wind');
+	button_change.position(width-190, 250);
+	button_change.mousePressed(function(){
+		if ( !mutating )
+		{
+			button_change.html('Disable wind')
+			mutateTime = millis();
+			mutating = true;
+			mutate();
+		}
+		else
+		{
+			button_change.html('Enable wind')
+			mutating = false;
+		}
+	});
+
+	button_hide = createButton('Hide UI');
+	button_hide.position(width-190, 280);
+	button_hide.mousePressed(hideUI);
+
+	label_perf = createSpan('Generated in #ms');
+	label_perf.position(width-190, 310);
+	label_perf.style('display', 'none');
+
+	label_source = createA('https://github.com/someuser-321/TreeGenerator', 'Check it out on GitHub!');
+	label_source.position(10, 330);
+	label_source2 = createA('https://someuser-321.github.io/TreeGenerator/TreeD.html', 'See me in 3D!');
+	label_source2.position(10, 350);
+
+	div_inputs = createDiv('');
+
+	mX = mouseX;
+	mY = mouseY;
+	panX = 0;
+	panY = 0;
+
+	readInputs(false);
+	startGrow();
+  ////tree end
+}
 
 function draw() {
   background(255);
-  count++;
   showWeather();
 
 //  start rain
@@ -107,6 +218,15 @@ function draw() {
   //   let branch = new Branch(len, steps);
   //   branch;
   // pop();
+  let startTime = millis();
+  push();
+  translate(width/2, 0);
+	branch(1, randSeed);
+
+	let endTime = millis();
+	label_perf.html('Generated in ' + Math.floor((endTime - startTime) * 10) / 10 + 'ms');
+  pop();
+  /// end of draw tree
 
 
 // draw wind 1 : circle
@@ -182,6 +302,10 @@ function mousePressed() {
   flock.addBoid(new Boid(mouseX,mouseY));
 }
 
+function windowResized()
+{
+	resizeCanvas(windowWidth, windowHeight);
+}
 // geting weather data
 function weatherAsk() {
   loadJSON(url, gotData);
@@ -196,9 +320,12 @@ function gotData(data) {
   currentCity = weather.name;
 
   windAngle = radians(currentWindDeg);
-  wind = p5.Vector.fromAngle(angle);
+  wind = p5.Vector.fromAngle(windAngle);
 }
 
+
+//////////////////create boid
+///////////////////
 function Boid(x,y) {
 
   this.acceleration = createVector(0,0);
@@ -222,13 +349,8 @@ Boid.prototype.applyForce = function(force) {
 }
 
 // We accumulate a new acceleration each time based on three rules
-
-// windPosition.add(wind);
-// this.velocity.add(this.acceleration);
 function Boid(x,y) {
-  // this.acceleration = createVector(0,0);
   this.acceleration = wind.copy();
-  // this.velocity = createVector(random(-1,1),random(-1,1));
   this.velocity = windPosition.copy();
   this.position = createVector(x,y);
   this.r = 3.0;
@@ -391,4 +513,241 @@ Boid.prototype.cohesion = function(boids) {
   } else {
     return createVector(0,0);
   }
+}
+///////////////
+/////////////////end boids
+
+//////start tree
+function branch(level, seed)
+{
+	if ( prog < level )
+		return;
+
+	randomSeed(seed);
+
+	var seed1 = random(1000),
+		seed2 = random(1000);
+
+	var growthLevel = (prog - level > 1) || (prog >= maxLevel + 1) ? 1 : (prog - level);
+
+	strokeWeight(12 * Math.pow((maxLevel - level + 1) / maxLevel, 2));
+
+	let len = growthLevel * size* (1 + rand2() * lenRand);
+
+	line(0,0, 0, len / level);
+	translate(0, len / level);
+
+
+	var doBranch1 = rand() < branchProb;
+	var doBranch2 = rand() < branchProb;
+
+	var doLeaves = rand() < leafProb;
+
+	if ( level < maxLevel )
+	{
+
+		var r1 = rot * (1 + rrand() * rotRand);
+		var r2 = -rot * (1 - rrand() * rotRand);
+
+		if ( doBranch1 )
+		{
+			push();
+			rotate(r1);
+			branch(level + 1, seed1);
+			pop();
+		}
+		if ( doBranch2 )
+		{
+			push();
+			rotate(r2);
+			branch(level + 1, seed2);
+			pop();
+		}
+	}
+
+	if ( (level >= maxLevel || (!doBranch1 && !doBranch2)) && doLeaves )
+	{
+		var p = Math.min(1, Math.max(0, prog - level));
+
+		var flowerSize = (size / 100) * p * (1 / 6) * (len / level);
+
+		strokeWeight(1);
+		stroke(240 + 15 * rand2(), 140 + 15 * rand2(), 140 + 15 * rand2());
+
+		rotate(-PI);
+		for ( var i=0 ; i<=8 ; i++ )
+		{
+			line(0, 0, 0, flowerSize * (1 + 0.5 * rand2()));
+			rotate(2 * PI/8);
+		}
+	}
+}
+
+function startGrow()
+{
+	growing = true;
+	prog = 1;
+	grow();
+}
+
+function grow()
+{
+	if ( prog > (maxLevel + 3) )
+	{
+		prog = maxLevel + 3;
+		loop();
+		growing = false;
+		return;
+	}
+
+	var startTime = millis();
+	loop();
+	var diff = millis() - startTime;
+
+	prog += maxLevel / 8 * Math.max(diff, 20) / 1000;
+	setTimeout(grow, Math.max(1, 20 - diff));
+}
+
+
+function rand()
+{
+	return random(1000) / 1000;
+}
+
+function rand2()
+{
+	return random(2000) / 1000 - 1;
+}
+
+function rrand()
+{
+	return rand2() + randBias;
+}
+///////end tree
+
+/// tree helpers
+function mouseReleased()
+{
+	if ( mouseX > 330 || mouseY > 400 )
+		return false;
+
+	if ( hide )
+		showUI();
+	hide = !hide;
+}
+
+function touchEnded()
+{
+	if ( hide )
+		showUI();
+	hide = !hide;
+
+	return false;
+}
+
+function showUI()
+{
+	slider_size.style('visibility', 'initial');
+	slider_level.style('visibility', 'initial');
+	slider_rot.style('visibility', 'initial');
+	slider_lenRand.style('visibility', 'initial');
+	slider_branchProb.style('visibility', 'initial');
+	slider_rotRand.style('visibility', 'initial');
+	slider_leafProb.style('visibility', 'initial');
+
+	button_seed.style('visibility', 'initial');
+	button_newSeed.style('visibility', 'initial');
+	button_randomParams.style('visibility', 'initial');
+	button_change.style('visibility', 'initial');
+	button_hide.style('visibility', 'initial');
+
+	label_size.style('visibility', 'initial');
+	label_level.style('visibility', 'initial');
+	label_rot.style('visibility', 'initial');
+	label_lenRand.style('visibility', 'initial');
+	label_branchProb.style('visibility', 'initial');
+	label_rotRand.style('visibility', 'initial');
+	label_leafProb.style('visibility', 'initial');
+	label_perf.style('visibility', 'initial');
+	label_seed.style('visibility', 'initial');
+	label_source.style('visibility', 'initial');
+	label_source2.style('visibility', 'initial');
+
+	input_seed.style('visibility', 'initial');
+
+	div_inputs.style('visibility', 'initial');
+}
+
+function hideUI(){
+  console.log('in hide ui')
+	slider_size.style('visibility', 'hidden');
+	slider_level.style('visibility', 'hidden');
+	slider_rot.style('visibility', 'hidden');
+	slider_lenRand.style('visibility', 'hidden');
+	slider_branchProb.style('visibility', 'hidden');
+	slider_rotRand.style('visibility', 'hidden');
+	slider_leafProb.style('visibility', 'hidden');
+
+	button_seed.style('visibility', 'hidden');
+	button_newSeed.style('visibility', 'hidden');
+	button_randomParams.style('visibility', 'hidden');
+	button_change.style('visibility', 'hidden');
+	button_hide.style('visibility', 'hidden');
+
+	label_size.style('visibility', 'hidden');
+	label_level.style('visibility', 'hidden');
+	label_rot.style('visibility', 'hidden');
+	label_lenRand.style('visibility', 'hidden');
+	label_branchProb.style('visibility', 'hidden');
+	label_rotRand.style('visibility', 'hidden');
+	label_leafProb.style('visibility', 'hidden');
+	label_perf.style('visibility', 'hidden');
+	label_seed.style('visibility', 'hidden');
+	label_source.style('visibility', 'hidden');
+	label_source2.style('visibility', 'hidden');
+
+	input_seed.style('visibility', 'hidden');
+
+	div_inputs.style('visibility', 'hidden');
+}
+
+function readInputs(updateTree)
+{
+	size = slider_size.value();
+	maxLevel = slider_level.value();
+	rot = slider_rot.value();
+	lenRand = slider_lenRand.value();
+	branchProb = slider_branchProb.value();
+	rotRand = slider_rotRand.value();
+	leafProb = slider_leafProb.value();
+
+	if ( updateTree && !growing )
+	{
+		prog = maxLevel + 1;
+		loop();
+	}
+}
+
+function mutate()
+{
+	if ( !mutating )
+		return;
+
+	var startTime = millis();
+	randomSeed(paramSeed);
+
+	var n = noise(startTime/20000) - 0.5;
+
+	randBias = 4 * Math.abs(n) * n;
+
+	paramSeed = 1000 * random();
+	randomSeed(randSeed);
+	readInputs(true);
+
+	var diff = millis() - startTime;
+
+	if ( diff < 20 )
+		setTimeout(mutate, 20 - diff);
+	else
+		setTimeout(mutate, 1);
 }
