@@ -207,9 +207,9 @@ function draw() {
   pop();
 
 // draw mountain
-// push();
-// mountains.draw();
-// pop();
+push();
+mountains.draw();
+pop();
 
 // draw tree
   // push();
