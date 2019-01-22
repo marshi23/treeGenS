@@ -3,10 +3,14 @@ function Mountains(top, bottom, time) { //#D36F6F, #AD1515
     let start, end;
 
     if (time < 0.5) {
-        let from = color(211,111,111);
-        let to = color(242,193,120);
-        let from1 = color(173,21,21);
-        let to1 = color(232,91,87);
+        // let from = color(211,111,111);
+        // let to = color(242,193,120);
+        let from = color(192,192,192);
+        let to = color(0,0,0);
+        // let from1 = color(173,21,21);
+        // let to1 = color(232,91,87);
+        let from1 = color(220,220,220);
+        let to1 = color(255,255,255);
         start = lerpColor(from, to, map(time, 0, 0.5, 0, 1));
         end = lerpColor(from1, to1, map(time, 0, 0.5, 0, 1));
     } else {

@@ -67,24 +67,24 @@ function setup() {
 
 // mountains
   time = random(1);
-  mountains = new Mountains(height - 100, height - 10, time);
+  mountains = new Mountains(height - 10, height - 10 * 70, time);
 
   ///tree
 
   slider_size = createSlider(100, 200, /mobile/i.test(window.navigator.userAgent) ? 100 : 150, 1);
-	slider_size.position(width-180, 25);
+	// slider_size.position(width-180, 40);
 	slider_level = createSlider(1, 13, 11, 1);
-	slider_level.position(width-180, 35);
+	// slider_level.position(width-180, 80);
 	slider_rot = createSlider(0, PI/2, (PI/2) / 4, (PI/2) / (3 * 5 * 8));
-	slider_rot.position(width-180, 55);
+	// slider_rot.position(width-180, 120);
 	slider_lenRand = createSlider(0, 1, 1, 0.01);
-	slider_lenRand.position(width-180, 60);
+	// slider_lenRand.position(width-180, 160);
 	slider_branchProb = createSlider(0, 1, 0.9, 0.01);
-	slider_branchProb.position(width-180, 70);
+	// slider_branchProb.position(width-180, 200);
 	slider_rotRand = createSlider(0, 1, 0.1, 0.01);
-	slider_rotRand.position(width-180, 110);
+	// slider_rotRand.position(width-180, 240);
 	slider_leafProb = createSlider(0, 1, 0.5, 0.01);
-	slider_leafProb.position(width-180, 130);
+	// slider_leafProb.position(width-180, 280);
 
 	slider_size.input(function(){readInputs(true)});
 	slider_level.input(function(){readInputs(true)});
@@ -96,36 +96,36 @@ function setup() {
 
 
 	label_size = createSpan('Size');
-	label_size.position(width-190, 10);
+	// label_size.position(width-190, 20);
 	label_level = createSpan('Recursion level');
-	label_level.position(width-190, 30);
+	// label_level.position(width-190, 60);
 	label_rot = createSpan('Split angle');
-	label_rot.position(width-190, 40);
+	// label_rot.position(width-190, 100);
 	label_lenRand = createSpan('Length variation');
-	label_lenRand.position(width-190, 55);
+	// label_lenRand.position(width-190, 140);
 	label_branchProb = createSpan('Split probability');
-	label_branchProb.position(width-190, 65);
+	// label_branchProb.position(width-190, 180);
 	label_rotRand = createSpan('Split rotation variation');
-	label_rotRand.position(width-190, 250);
+	// label_rotRand.position(width-190, 220);
 	label_leafProb = createSpan('Flower probability');
-	label_leafProb.position(width-190, 300);
+	// label_leafProb.position(width-190, 260);
 
 	label_seed = createSpan('Seed:');
-	label_seed.position(width-190, 162);
+	// label_seed.position(width-190, 162);
 
 	input_seed = createInput(randSeed);
-	input_seed.position(width-190, 160);
+	// input_seed.position(width-190, 160);
 	input_seed.style('width', '50px')
 
 	button_seed = createButton('Watch it grow!');
-	button_seed.position(width-190, 190);
+	// button_seed.position(width-190, 190);
 	button_seed.mousePressed(function() {
 		randSeed = input_seed.value();
 		startGrow();
 	});
 
 	button_newSeed = createButton('Generate new tree');
-	button_newSeed.position(width-190, 190);
+	// button_newSeed.position(width-190, 190);
 	button_newSeed.mousePressed(function(){
 		randSeed = Math.floor(Math.random() * 1000);
 		prog = 100;
@@ -134,7 +134,7 @@ function setup() {
 	});
 
 	button_randomParams = createButton('Randomise parameters');
-	button_randomParams.position(width-190, 220);
+	// button_randomParams.position(width-190, 220);
 	button_randomParams.mousePressed(function(){
 		randomSeed(paramSeed);
 
@@ -152,7 +152,7 @@ function setup() {
 	});
 
 	button_change = createButton('Enable wind');
-	button_change.position(width-190, 250);
+	// button_change.position(width-190, 250);
 	button_change.mousePressed(function(){
 		if ( !mutating )
 		{
@@ -169,17 +169,17 @@ function setup() {
 	});
 
 	button_hide = createButton('Hide UI');
-	button_hide.position(width-190, 280);
+	// button_hide.position(width-190, 280);
 	button_hide.mousePressed(hideUI);
 
 	label_perf = createSpan('Generated in #ms');
-	label_perf.position(width-190, 310);
+	// label_perf.position(width-190, 310);
 	label_perf.style('display', 'none');
-
-	label_source = createA('https://github.com/someuser-321/TreeGenerator', 'Check it out on GitHub!');
-	label_source.position(10, 330);
-	label_source2 = createA('https://someuser-321.github.io/TreeGenerator/TreeD.html', 'See me in 3D!');
-	label_source2.position(10, 350);
+  //
+	// label_source = createA('https://github.com/someuser-321/TreeGenerator', 'Check it out on GitHub!');
+	// label_source.position(10, 330);
+	// label_source2 = createA('https://someuser-321.github.io/TreeGenerator/TreeD.html', 'See me in 3D!');
+	// label_source2.position(10, 350);
 
 	div_inputs = createDiv('');
 
@@ -194,7 +194,7 @@ function setup() {
 }
 
 function draw() {
-  background(255);
+  background(0);
   showWeather();
 
 //  start rain
@@ -231,10 +231,10 @@ pop();
 
 // draw wind 1 : circle
 push();
-  windPosition.add(wind);
-  stroke(0);
-  fill(51);
-  ellipse(windPosition.x,windPosition.y,100,100);
+  // windPosition.add(wind);
+  // stroke(0);
+  // fill( 126,25,27);
+  // ellipse(windPosition.x,windPosition.y,100,100);
 pop();
 
 // keeps it in the sreen
@@ -253,27 +253,31 @@ pop();
 // weather details
 function showWeather() {
   push();
-    textSize(50)
+    textSize(30)
     noStroke();
-    text(`${currentWindSpeed} mph`,20,70);
+    fill(255);
+    text(`${currentCity}`,20,70);
   pop();
 
   push();
     textSize(20)
     noStroke();
-    text(`${currentWeather}`,21, 95);
+    fill(255);
+    text(`${currentTempreture}°C`,21, 95); //${currentWindSpeed} mph`
   pop();
 
   push();
     textSize(20)
     noStroke();
-    text(`${currentCity}`,21,120);
+    fill(255);
+    text(`${currentWeather}`,21,120); //${currentWeather}
   pop();
 
   push();
     textSize(20)
     noStroke();
-    text(`${currentTempreture}°C`,21,145);
+    fill(255);
+    text(`Wind ${currentWindSpeed} mph`,21,145);
   pop();
 
   // wind direction arrow compass
@@ -413,8 +417,8 @@ Boid.prototype.seek = function(target) {
 Boid.prototype.render = function() {
   // Draw a triangle rotated in the direction of velocity
   var theta = this.velocity.heading() + radians(90);
-  fill(127);
-  stroke(200);
+  stroke(255);
+  fill(225);
   push();
   translate(this.position.x,this.position.y);
   rotate(theta);
@@ -534,6 +538,7 @@ function branch(level, seed)
 
 	let len = growthLevel * size* (1 + rand2() * lenRand);
 
+  stroke(255);
 	line(0,0, 0, len / level);
 	translate(0, len / level);
 
@@ -577,6 +582,7 @@ function branch(level, seed)
 		rotate(-PI);
 		for ( var i=0 ; i<=8 ; i++ )
 		{
+      stroke(255,215,0);
 			line(0, 0, 0, flowerSize * (1 + 0.5 * rand2()));
 			rotate(2 * PI/8);
 		}
