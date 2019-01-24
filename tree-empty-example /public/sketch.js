@@ -27,7 +27,7 @@ let windPosition; // position of wind objects
 let windAngle;
 
 /// rain
-let nDrops = 1000;
+let nDrops = 100;
 let drops = [];
 
 // flock
@@ -59,7 +59,7 @@ function setup() {
 
   // create boids
   if (currentWindSpeed) {
-    for (var i = 0; i < 100; i++) {
+    for (var i = 0; i < 50; i++) {
       var b = new Boid(width/2,height/2);
       flock.addBoid(b);
     }
@@ -135,7 +135,7 @@ function setup() {
 
 	button_randomParams = createButton('Randomise parameters');
 	// button_randomParams.position(width-190, 220);
-	button_randomParams.mousePressed(function(){
+	button_randomParams.mousePressed(function() {
 		randomSeed(paramSeed);
 
 		slider_level.value(1 * slider_level.value() + 4 * rand2() * slider_level.attribute('step'));
@@ -152,17 +152,16 @@ function setup() {
 	});
 
 	button_change = createButton('Enable wind');
-	// button_change.position(width-190, 250);
-	button_change.mousePressed(function(){
-		if ( !mutating )
-		{
+	// button_change.position(width-190, 300);
+
+  button_change.mousePressed(function() {
+
+		if ( !mutating ) {
 			button_change.html('Disable wind')
 			mutateTime = millis();
 			mutating = true;
 			mutate();
-		}
-		else
-		{
+		} else {
 			button_change.html('Enable wind')
 			mutating = false;
 		}
@@ -195,7 +194,7 @@ function setup() {
 
 function draw() {
   background(0);
-  showWeather();
+  // showWeather();
 
 //  start rain
   push();
@@ -206,47 +205,42 @@ function draw() {
   }
   pop();
 
+
+  // draw wind 1 : circle
+  push();
+    windPosition.add(wind);
+    stroke(0);
+    fill(226, 114, 91);
+    ellipse(windPosition.x,windPosition.y,100,100);
+  pop();
+  // keeps circle in the sreen
+  if (windPosition.x > width)  windPosition.x = 0;
+  if (windPosition.x < 0)      windPosition.x = width;
+  if (windPosition.y > height) windPosition.y = 0;
+  if (windPosition.y < 0)      windPosition.y = height;
+
+
+  // draw wind 2
+  push();
+    flock.run();
+  pop();
+
 // draw mountain
 push();
 mountains.draw();
 pop();
 
 // draw tree
-  // push();
-  //   stroke(255);
-  //   translate(width/2, height-100);
-  //   let branch = new Branch(len, steps);
-  //   branch;
-  // pop();
-  let startTime = millis();
   push();
-  translate(width/2, 0);
-	branch(1, randSeed);
-
-	let endTime = millis();
-	label_perf.html('Generated in ' + Math.floor((endTime - startTime) * 10) / 10 + 'ms');
+    let startTime = millis();
+    let endTime = millis();
+    translate(width/2, 0);
+  	branch(1, randSeed);
   pop();
   /// end of draw tree
 
-
-// draw wind 1 : circle
-push();
-  // windPosition.add(wind);
-  // stroke(0);
-  // fill( 126,25,27);
-  // ellipse(windPosition.x,windPosition.y,100,100);
-pop();
-
-// keeps it in the sreen
-if (windPosition.x > width)  windPosition.x = 0;
-if (windPosition.x < 0)      windPosition.x = width;
-if (windPosition.y > height) windPosition.y = 0;
-if (windPosition.y < 0)      windPosition.y = height;
-
-// draw wind 2 : boids
-push();
-  flock.run();
-pop();
+// display weather details
+showWeather();
 }
 
 
@@ -263,14 +257,14 @@ function showWeather() {
     textSize(20)
     noStroke();
     fill(255);
-    text(`${currentTempreture}°C`,21, 95); //${currentWindSpeed} mph`
+    text(`${currentTempreture}°C`,21, 95);
   pop();
 
   push();
     textSize(20)
     noStroke();
     fill(255);
-    text(`${currentWeather}`,21,120); //${currentWeather}
+    text(`${currentWeather}`,21,120);
   pop();
 
   push();
@@ -295,21 +289,19 @@ function showWeather() {
   fill(45, 123, 182);
   triangle(0, -18, -6, -10, 6, -10);
   pop();
-  }
 
-  function randomizeBackground() {
-    // bgColor = color(round(random(255)), round(random(0, 100)), 255);
   }
 
 function mousePressed() {
   weatherAsk();
+  // adds a boid with a click
   flock.addBoid(new Boid(mouseX,mouseY));
 }
 
-function windowResized()
-{
+function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
 }
+
 // geting weather data
 function weatherAsk() {
   loadJSON(url, gotData);
@@ -522,47 +514,39 @@ Boid.prototype.cohesion = function(boids) {
 /////////////////end boids
 
 //////start tree
-function branch(level, seed)
-{
+function branch(level, seed) {
 	if ( prog < level )
 		return;
 
 	randomSeed(seed);
 
-	var seed1 = random(1000),
-		seed2 = random(1000);
+	let seed1 = random(1000), seed2 = random(1000);
 
-	var growthLevel = (prog - level > 1) || (prog >= maxLevel + 1) ? 1 : (prog - level);
+	let growthLevel = (prog - level > 1) || (prog >= maxLevel + 1) ? 1 : (prog - level);
 
 	strokeWeight(12 * Math.pow((maxLevel - level + 1) / maxLevel, 2));
-
 	let len = growthLevel * size* (1 + rand2() * lenRand);
-
   stroke(255);
 	line(0,0, 0, len / level);
+  // line(0,0, 10, len / level+1);
 	translate(0, len / level);
 
+	let doBranch1 = rand() < branchProb;
+	let doBranch2 = rand() < branchProb;
+	let doLeaves = rand() < leafProb;
 
-	var doBranch1 = rand() < branchProb;
-	var doBranch2 = rand() < branchProb;
+	if ( level < maxLevel ) {
+		let r1 = rot * (1 + rrand() * rotRand);
+		let r2 = -rot * (1 - rrand() * rotRand);
 
-	var doLeaves = rand() < leafProb;
-
-	if ( level < maxLevel )
-	{
-
-		var r1 = rot * (1 + rrand() * rotRand);
-		var r2 = -rot * (1 - rrand() * rotRand);
-
-		if ( doBranch1 )
-		{
+		if ( doBranch1 ) {
 			push();
 			rotate(r1);
 			branch(level + 1, seed1);
 			pop();
 		}
-		if ( doBranch2 )
-		{
+
+		if ( doBranch2 ) {
 			push();
 			rotate(r2);
 			branch(level + 1, seed2);
@@ -570,15 +554,12 @@ function branch(level, seed)
 		}
 	}
 
-	if ( (level >= maxLevel || (!doBranch1 && !doBranch2)) && doLeaves )
-	{
-		var p = Math.min(1, Math.max(0, prog - level));
-
-		var flowerSize = (size / 100) * p * (1 / 6) * (len / level);
+	if ( (level >= maxLevel || (!doBranch1 && !doBranch2)) && doLeaves ) {
+		let p = Math.min(1, Math.max(0, prog - level));
+		let flowerSize = (size / 100) * p * (1 / 6) * (len / level);
 
 		strokeWeight(1);
 		stroke(240 + 15 * rand2(), 140 + 15 * rand2(), 140 + 15 * rand2());
-
 		rotate(-PI);
 		for ( var i=0 ; i<=8 ; i++ )
 		{
@@ -589,17 +570,14 @@ function branch(level, seed)
 	}
 }
 
-function startGrow()
-{
+function startGrow() {
 	growing = true;
 	prog = 1;
 	grow();
 }
 
-function grow()
-{
-	if ( prog > (maxLevel + 3) )
-	{
+function grow() {
+	if ( prog > (maxLevel + 3) ) {
 		prog = maxLevel + 3;
 		loop();
 		growing = false;
@@ -615,44 +593,42 @@ function grow()
 }
 
 
-function rand()
-{
+function rand() {
 	return random(1000) / 1000;
 }
 
-function rand2()
-{
+function rand2() {
 	return random(2000) / 1000 - 1;
 }
 
-function rrand()
-{
+function rrand() {
 	return rand2() + randBias;
 }
 ///////end tree
 
 /// tree helpers
-function mouseReleased()
-{
-	if ( mouseX > 330 || mouseY > 400 )
+function mouseReleased() {
+	if ( mouseX > 330 || mouseY > 400 ) {
 		return false;
+  }
 
-	if ( hide )
+	if ( hide ) {
 		showUI();
-	hide = !hide;
+    hide = !hide;
+  }
+	// hide = !hide;
 }
 
-function touchEnded()
-{
-	if ( hide )
+function touchEnded() {
+	if ( hide ) {
 		showUI();
-	hide = !hide;
+	  hide = !hide;
 
-	return false;
+	   return false;
+  }
 }
 
-function showUI()
-{
+function showUI() {
 	slider_size.style('visibility', 'initial');
 	slider_level.style('visibility', 'initial');
 	slider_rot.style('visibility', 'initial');
@@ -684,8 +660,7 @@ function showUI()
 	div_inputs.style('visibility', 'initial');
 }
 
-function hideUI(){
-  console.log('in hide ui')
+function hideUI() {
 	slider_size.style('visibility', 'hidden');
 	slider_level.style('visibility', 'hidden');
 	slider_rot.style('visibility', 'hidden');
@@ -717,8 +692,7 @@ function hideUI(){
 	div_inputs.style('visibility', 'hidden');
 }
 
-function readInputs(updateTree)
-{
+function readInputs(updateTree) {
 	size = slider_size.value();
 	maxLevel = slider_level.value();
 	rot = slider_rot.value();
@@ -727,22 +701,20 @@ function readInputs(updateTree)
 	rotRand = slider_rotRand.value();
 	leafProb = slider_leafProb.value();
 
-	if ( updateTree && !growing )
-	{
+	if ( updateTree && !growing ) {
 		prog = maxLevel + 1;
 		loop();
 	}
 }
 
-function mutate()
-{
-	if ( !mutating )
+function mutate() {
+	if ( !mutating ) {
 		return;
-
-	var startTime = millis();
+  }
+	let startTime = millis();
 	randomSeed(paramSeed);
 
-	var n = noise(startTime/20000) - 0.5;
+	let n = noise(startTime/20000) - 0.5;
 
 	randBias = 4 * Math.abs(n) * n;
 
@@ -750,10 +722,11 @@ function mutate()
 	randomSeed(randSeed);
 	readInputs(true);
 
-	var diff = millis() - startTime;
+	let diff = millis() - startTime;
 
-	if ( diff < 20 )
+	if ( diff < 20 ) {
 		setTimeout(mutate, 20 - diff);
-	else
+	} else {
 		setTimeout(mutate, 1);
+  }
 }
